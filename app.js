@@ -1,15 +1,28 @@
 var express = require('express');
 var jwt = require('express-jwt');
 var cors = require('cors');
+var jwks = require('jwks-rsa');
+var bodyParser = require('body-parser');
 const app = express();
 
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // Middle-ware 
 const authCheck = jwt({
-	secret: 'AUTH0_SECRET',
-	audience: 'AUTH0_CLIENT_ID'
+	secret: jwks.expressJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 5,
+        // YOUR-AUTH0-DOMAIN name e.g prosper.auth0.com
+        jwksUri: "https://ram1990.auth0.com/.well-known/jwks.json"
+    }),
+    // This is the identifier we set when we created the API
+    audience: 'https://ram1990.auth0.com/api/v2/',
+    issuer: 'https://ram1990.auth0.com/',
+    algorithms: ['RS256']
 });
 
 var jedis = [
@@ -40,7 +53,7 @@ var jedis = [
   }
 ];
 //Get All
-app.get('/api/jedis', function(req, res) {
+app.get('/api/jedis', authCheck, function(req, res) {
 	res.json(jedis);
 });
 
