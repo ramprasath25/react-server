@@ -12,10 +12,34 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+app.set('view engine', 'jade');
 app.use(express.static('public'));
+/** CROS-Request ***/
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", req.headers.origin);
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS");
+    res.header("Access-Control-Allow-Credentials", true);
+    next();
+});
+app.use('/', require('./routes/index'));
+// catch 404 and forward to error handler
+// app.use(function(req, res, next) {
+//   var err = new Error('Not Found');
+//   err.status = 404;
+//   next(err);
+// });
+
+// app.use(function(err, req, res, next) {
+//   res.status(err.status || 500);
+//   res.render('error', {
+//     message: err.message,
+//     error: err
+//   });
+// });
 
 var port = process.env.port || 3000;
-
+mongoose.Promise = global.Promise;
 mongoose.createConnection(config.database, function(err) {
     if (err) {
         console.log("Database not connected", err);
