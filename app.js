@@ -38,9 +38,11 @@ app.use('/', require('./routes/index'));
 //   });
 // });
 
-var port = process.env.port || 3000;
+var port = process.env.port || 3001;
 mongoose.Promise = global.Promise;
-mongoose.createConnection(config.database, function(err) {
+mongoose.connect(config.database,{
+    useMongoClient: true
+}, function(err) {
     if (err) {
         console.log("Database not connected", err);
     } else {
@@ -48,7 +50,7 @@ mongoose.createConnection(config.database, function(err) {
     }
 });
 
-app.set('secretKey', config.secret);
+
 // Morgan Log File
 app.use(morgan('dev'));
 app.listen(port);
