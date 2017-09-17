@@ -2,74 +2,70 @@ var express = require('express');
 var app = express.Router();
 var User = require('../models/user.js');
 var jwt = require('jsonwebtoken');
-
 var config = require('../helper/config');
-app.use(function(req, res, next) {
-  var token = req.body.token || req.query.token || req.headers['x-access-token'];
-  if(token) {
-    jwt.verify(token, config.secret, function(err, decoded) {
-      if(err) {
-        res.json({ success: false, message: "Authentication failed" });
-      } else {
-        req.decoded = decoded;
-        next();
-      }
-    });
-  } else {
-      res.json({ success: false, message: "No token provided" }); 
-  }
-})
-app.get('/', function(req, res) {
-	res.json("works");
-});
 
+//Adding user
 app.get('/adduser', function(req, res) {
-
-  var ram = new User({ 
-    name: 'Ram', 
-    password: 'password',
-    admin: true 
-	});
-  
-  ram.save(function(err, data) {
-    if (err) {
-      res.json({ success: false });
-    } else {
-      console.log('User saved successfully');
-      res.json({ success: true });
-    }    
-  });
-
-});
-
-app.get('/listuser', function(req, res) {
-  User.find({}, function(err, data) {
-    if(err) {
-      res.json({ success: false });
-    } else {
-      res.json({ success: true, users: data });
-    }
-  });
-});
-
-app.post('/aunthenticate', function(req, res) {
-  User.findOne({name : req.body.name}, function(err, data) {
-    if(err) {
-      res.json({ success: false });
-    } else {
-      if(!data) {
-        res.json({ success: true, message: "No user found, Aunthentication failed" });
-      } else {
-        if(data.password == req.body.password) {
-          var token = jwt.sign({data: data}, config.secret, {
-             expiresIn: 604800
-          });
-          res.json({ success: true, token: token, message: "Enjoy your token" });
+    let ram = new User({
+        name: 'Ram',
+        password: 'password',
+        admin: true
+    });
+    ram.save(function(err, data) {
+        if (err) {
+            res.json({
+                success: false
+            });
         } else {
-          res.json({ success: false , message : "Password doesnt match"});
+            console.log('User saved successfully');
+            res.json({
+                success: true
+            });
         }
-      }
-    }
-  });
+    });
 });
+
+// Authenticate and sending jwt 
+app.post('/aunthenticate', function(req, res) {
+    let loginUser = new User({
+        id: req.body.id,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        pictureUrl: req.body.pictureUrl,
+        publicProfileUrls: req.body.publicProfileUrl,
+        emailAddress: req.body.emailAddress,
+        loginDate: new Date(),
+        isLoggedIn: true
+    });
+    loginUser.save(function(err, data) {
+        if (err) {
+            res.json({
+                success: false,
+                message: "Error Inserting data"
+            });
+        } else {
+            let token = jwt.sign({
+                data: loginUser
+            }, config.secret, {
+                expiresIn: 604800 // expires in 24hours
+            });
+            var userInfo = {};
+            userInfo.token = token
+            userInfo.id = data.id,
+            userInfo.firstName = data.firstName,
+            userInfo.lastName = data.lastName,
+            userInfo.pictureUrl = data.pictureUrl,
+            userInfo.publicProfileUrls = data.publicProfileUrl,
+            userInfo.emailAddress = data.emailAddress,
+            userInfo.loginDate = data.loginDate,
+            userInfo.isLoggedIn = data.isLoggedIn
+            res.json({
+                success: true,
+                userInfo: userInfo,
+                message: "Aunthentication success"
+            });
+        }
+    });
+});
+
 module.exports = app;

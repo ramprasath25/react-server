@@ -23,6 +23,7 @@ app.use(function(req, res, next) {
     next();
 });
 app.use('/', require('./routes/index'));
+app.use('/user', require('./routes/user'));
 // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
 //   var err = new Error('Not Found');
@@ -38,7 +39,7 @@ app.use('/', require('./routes/index'));
 //   });
 // });
 
-var port = process.env.port || 3001;
+var port = process.env.port || 8000;
 mongoose.Promise = global.Promise;
 mongoose.connect(config.database,{
     useMongoClient: true
@@ -50,8 +51,7 @@ mongoose.connect(config.database,{
     }
 });
 
-
 // Morgan Log File
 app.use(morgan('dev'));
 app.listen(port);
-console.log("Server running at port" + port);
+console.log("Server running at port..." + port);
