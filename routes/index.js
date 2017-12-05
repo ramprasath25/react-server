@@ -27,6 +27,7 @@ app.get('/adduser', function(req, res) {
 
 // Authenticate and sending jwt 
 app.post('/aunthenticate', function(req, res) {
+   
     let loginUser = new User({
         id: req.body.id,
         firstName: req.body.firstName,
@@ -34,20 +35,23 @@ app.post('/aunthenticate', function(req, res) {
         pictureUrl: req.body.pictureUrl,
         publicProfileUrls: req.body.publicProfileUrl,
         emailAddress: req.body.emailAddress,
+        location: req.body.location,
         loginDate: new Date(),
         isLoggedIn: true
     });
     loginUser.save(function(err, data) {
         if (err) {
+           
             res.json({
                 success: false,
                 message: "Error Inserting data"
             });
         } else {
+            
             let token = jwt.sign({
                 data: loginUser
             }, config.secret, {
-                expiresIn: 604800 // expires in 24hours
+                    expiresIn: "30d" // expires in 24hours
             });
             var userInfo = {};
             userInfo.token = token
@@ -57,6 +61,7 @@ app.post('/aunthenticate', function(req, res) {
             userInfo.pictureUrl = data.pictureUrl,
             userInfo.publicProfileUrls = data.publicProfileUrl,
             userInfo.emailAddress = data.emailAddress,
+            userInfo.location = data.location,
             userInfo.loginDate = data.loginDate,
             userInfo.isLoggedIn = data.isLoggedIn
             res.json({

@@ -20,6 +20,9 @@ module.exports = mongoose.model('user', new Schema({
     emailAddress: {
         type: String
     },
+    location: {
+        type: String
+    },
     loginDate: {
         type: String
     },
